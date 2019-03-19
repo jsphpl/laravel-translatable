@@ -34,21 +34,6 @@ You can install the package via composer:
 composer require spatie/laravel-translatable
 ```
 
-The package will automatically register itself.
-
-If you want to change add fallback_locale, you must publish the config file:
-```
-php artisan vendor:publish --provider="Spatie\Translatable\TranslatableServiceProvider"
-```
-
-This is the contents of the published file:
-```php
-return [
-  'fallback_locale' => 'en',
-];
-```
-
-
 ## Making a model translatable
 
 The required steps to make a model translatable are:
@@ -204,7 +189,7 @@ You can immediately set translations when creating a model. Here's an example:
 ```php
 NewsItem::create([
    'name' => [
-      'en' => 'Name in English'
+      'en' => 'Name in English',
       'nl' => 'Naam in het Nederlands'
    ],
 ]);

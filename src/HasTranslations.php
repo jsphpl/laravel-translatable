@@ -73,7 +73,9 @@ trait HasTranslations
         if ($key !== null) {
             $this->guardAgainstNonTranslatableAttribute($key);
 
-            return array_filter(json_decode($this->getAttributes()[$key] ?? '' ?: '{}', true) ?: []);
+            return array_filter(json_decode($this->getAttributes()[$key] ?? '' ?: '{}', true) ?: [], function ($value) {
+                return $value !== null && $value !== false && $value !== '';
+            });
         }
 
         return array_reduce($this->getTranslatableAttributes(), function ($result, $item) {
@@ -149,6 +151,13 @@ trait HasTranslations
         return in_array($key, $this->getTranslatableAttributes());
     }
 
+    public function hasTranslation(string $key, string $locale = null): bool
+    {
+        $locale = $locale ?: $this->getLocale();
+
+        return isset($this->getTranslations($key)[$locale]);
+    }
+
     protected function guardAgainstNonTranslatableAttribute(string $key)
     {
         if (! $this->isTranslatableAttribute($key)) {
@@ -166,7 +175,7 @@ trait HasTranslations
             return $locale;
         }
 
-        if (! is_null($fallbackLocale = config('translatable.fallback_locale'))) {
+        if (! is_null($fallbackLocale = config('app.fallback_locale'))) {
             return $fallbackLocale;
         }
 

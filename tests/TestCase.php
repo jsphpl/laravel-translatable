@@ -5,20 +5,14 @@ namespace Spatie\Translatable\Test;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Spatie\Translatable\TranslatableServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->setUpDatabase();
-    }
-
-    protected function getPackageProviders($app)
-    {
-        return [TranslatableServiceProvider::class];
     }
 
     protected function setUpDatabase()

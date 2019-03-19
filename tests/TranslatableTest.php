@@ -9,7 +9,7 @@ class TranslatableTest extends TestCase
     /** @var \Spatie\Translatable\Test\TestModel */
     protected $testModel;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -19,7 +19,7 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_will_return_fallback_locale_translation_when_getting_an_unknown_locale()
     {
-        $this->app['config']->set('translatable.fallback_locale', 'en');
+        $this->app['config']->set('app.fallback_locale', 'en');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->save();
@@ -30,7 +30,7 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_provides_a_flog_to_not_return_fallback_locale_translation_when_getting_an_unknown_locale()
     {
-        $this->app['config']->set('translatable.fallback_locale', 'en');
+        $this->app['config']->set('app.fallback_locale', 'en');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->save();
@@ -41,7 +41,7 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_will_return_fallback_locale_translation_when_getting_an_unknown_locale_and_fallback_is_true()
     {
-        $this->app['config']->set('translatable.fallback_locale', 'en');
+        $this->app['config']->set('app.fallback_locale', 'en');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->save();
@@ -52,7 +52,7 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_will_return_an_empty_string_when_getting_an_unknown_locale_and_fallback_is_not_set()
     {
-        $this->app['config']->set('translatable.fallback_locale', '');
+        $this->app['config']->set('app.fallback_locale', '');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->save();
@@ -63,7 +63,7 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_will_return_an_empty_string_when_getting_an_unknown_locale_and_fallback_is_empty()
     {
-        $this->app['config']->set('translatable.fallback_locale', '');
+        $this->app['config']->set('app.fallback_locale', '');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->save();
@@ -342,6 +342,18 @@ class TranslatableTest extends TestCase
     }
 
     /** @test */
+    public function it_can_check_if_an_attribute_has_translation()
+    {
+        $this->testModel->setTranslation('name', 'en', 'testValue_en');
+        $this->testModel->setTranslation('name', 'nl', null);
+        $this->testModel->save();
+
+        $this->assertTrue($this->testModel->hasTranslation('name', 'en'));
+
+        $this->assertFalse($this->testModel->hasTranslation('name', 'pt'));
+    }
+
+    /** @test */
     public function it_can_correctly_set_a_field_when_a_mutator_is_defined()
     {
         $testModel = (new class() extends TestModel {
@@ -450,12 +462,45 @@ class TranslatableTest extends TestCase
     /** @test */
     public function it_will_return_fallback_locale_translation_when_getting_an_empty_translation_from_the_locale()
     {
-        $this->app['config']->set('translatable.fallback_locale', 'en');
+        $this->app['config']->set('app.fallback_locale', 'en');
 
         $this->testModel->setTranslation('name', 'en', 'testValue_en');
         $this->testModel->setTranslation('name', 'nl', null);
         $this->testModel->save();
 
         $this->assertSame('testValue_en', $this->testModel->getTranslation('name', 'nl'));
+    }
+
+    /** @test */
+    public function it_will_return_correct_translation_value_if_value_is_set_to_zero()
+    {
+        $this->testModel->setTranslation('name', 'nl', '0');
+        $this->testModel->save();
+
+        $this->assertSame('0', $this->testModel->getTranslation('name', 'nl'));
+    }
+
+    /** @test */
+    public function it_will_not_return_fallback_value_if_value_is_set_to_zero()
+    {
+        $this->app['config']->set('app.fallback_locale', 'en');
+
+        $this->testModel->setTranslation('name', 'en', '1');
+        $this->testModel->setTranslation('name', 'nl', '0');
+        $this->testModel->save();
+
+        $this->assertSame('0', $this->testModel->getTranslation('name', 'nl'));
+    }
+
+    /** @test */
+    public function it_will_not_remove_zero_value_of_other_locale_in_database()
+    {
+        $this->app['config']->set('app.fallback_locale', 'en');
+
+        $this->testModel->setTranslation('name', 'nl', '0');
+        $this->testModel->setTranslation('name', 'en', '1');
+        $this->testModel->save();
+
+        $this->assertSame('0', $this->testModel->getTranslation('name', 'nl'));
     }
 }
